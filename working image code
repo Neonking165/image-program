@@ -1,0 +1,33 @@
+import io
+import requests
+import numpy as np
+import matplotlib.pyplot as plt
+import tf_keras
+from PIL import Image, ImageOps
+
+np.set_printoptions(suppress=True)
+
+# tf_keras is the Keras 2 compatibility layer — required for Teachable Machine .h5 exports
+model = tf_keras.models.load_model(
+    '/Users/rileyharries/Desktop/course 2/test/converted_keras/keras_model.h5',
+    compile=False,
+)
+class_names = open('/Users/rileyharries/Desktop/course 2/test/converted_keras/labels.txt', "r").readlines()
+image=Image.open('/Users/rileyharries/Desktop/course 2/test/converted_keras/Screenshot 2026-06-28 at 2.54.19 pm.png').convert('RGB')
+# Preprocess for the model
+image_resized = ImageOps.fit(image, (224, 224), Image.Resampling.LANCZOS)
+image_array = np.asarray(image_resized)
+data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+data[0] = (image_array.astype(np.float32) / 127.5) - 1
+
+# Run prediction
+prediction = model.predict(data)
+
+prediction = model.predict(data, verbose=0)
+
+
+
+for i in range(len(class_names)):
+    class_name = class_names[i].strip()[2:]
+    confidence = prediction[0][i]
+    print(f"Class: {class_name}, Confidence: {confidence:.1%}")
