@@ -1,0 +1,58 @@
+import cv2
+import numpy as np
+import tf_keras
+from PIL import Image, ImageOps
+
+np.set_printoptions(suppress=True)
+
+# Load model and labels
+model = tf_keras.models.load_model(
+    '/Users/rileyharries/Desktop/course 2/test/converted_keras/keras_model.h5',
+    compile=False,
+)
+class_names = open(
+    '/Users/rileyharries/Desktop/course 2/test/converted_keras/labels.txt', "r"
+).readlines()
+
+# Open webcam (0 = default camera)
+camera = cv2.VideoCapture(0)
+
+if not camera.isOpened():
+    raise RuntimeError("Could not open webcam. Try changing the index (0, 1, 2...).")
+
+while True:
+    ret, frame = camera.read()
+    if not ret:
+        print("Failed to grab frame")
+        break
+
+    # Convert BGR (OpenCV) to RGB (PIL) for the model
+    image = Image.fromarray(cv2.cvtColor(frame, cv2.COLOR_BGR2RGB))
+
+    # Preprocess for the model
+    image_resized = ImageOps.fit(image, (224, 224), Image.Resampling.LANCZOS)
+    image_array = np.asarray(image_resized)
+    data = np.ndarray(shape=(1, 224, 224, 3), dtype=np.float32)
+    data[0] = (image_array.astype(np.float32) / 127.5) - 1
+
+    # Run prediction
+    prediction = model.predict(data, verbose=0)
+    index = np.argmax(prediction[0])
+    class_name = class_names[index].strip()[2:]
+    confidence = prediction[0][index]
+
+    # Overlay result on the frame
+    label = f"{class_name}: {confidence:.1%}"
+    cv2.putText(
+        frame, label, (10, 30),
+        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA
+    )
+
+    cv2.imshow("Teachable Machine - Webcam", frame)
+
+    # Press 'q' to quit
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+camera.release()
+cv2.destroyAllWindows()
