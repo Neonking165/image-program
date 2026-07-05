@@ -5,13 +5,18 @@ from PIL import Image, ImageOps
 
 np.set_printoptions(suppress=True)
 
+# Set the model and label locations
+model_location="models/keras_model.h5"
+label_location="models/labels.txt"
+
+
 # Load model and labels
 model = tf_keras.models.load_model(
-    '/Users/rileyharries/Desktop/course 2/test/converted_keras/keras_model.h5',
+    model_location,
     compile=False,
 )
 class_names = open(
-    '/Users/rileyharries/Desktop/course 2/test/converted_keras/labels.txt', "r"
+    label_location, "r"
 ).readlines()
 
 # Open webcam (0 = default camera)
