@@ -7,13 +7,17 @@ from PIL import Image, ImageOps
 
 np.set_printoptions(suppress=True)
 
+class_names_location = 'labels.txt'
+model_location = 'model.h5'
+image_location = 'image.jpg'
+confidence_threshold = 0.999
 # tf_keras is the Keras 2 compatibility layer — required for Teachable Machine .h5 exports
 model = tf_keras.models.load_model(
-    '/Users/rileyharries/Desktop/course 2/test/converted_keras/keras_model.h5',
+    model_location,
     compile=False,
 )
-class_names = open('/Users/rileyharries/Desktop/course 2/test/converted_keras/labels.txt', "r").readlines()
-image=Image.open('/Users/rileyharries/Desktop/course 2/test/converted_keras/Screenshot 2026-06-28 at 2.54.19 pm.png').convert('RGB')
+class_names = open(class_names_location, "r").readlines()
+image=Image.open(image_location).convert('RGB')
 # Preprocess for the model
 image_resized = ImageOps.fit(image, (224, 224), Image.Resampling.LANCZOS)
 image_array = np.asarray(image_resized)
@@ -31,3 +35,9 @@ for i in range(len(class_names)):
     class_name = class_names[i].strip()[2:]
     confidence = prediction[0][i]
     print(f"Class: {class_name}, Confidence: {confidence:.1%}")
+
+for i in range(len(class_names)):
+    class_name = class_names[i].strip()[2:]
+    confidence = prediction[0][i]
+    if confidence > confidence_threshold:
+        print("prediction", f"Class: {class_name}, Confidence: {confidence:.1%}")
