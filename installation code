@@ -1,0 +1,8 @@
+macos
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+brew install --cask visual-studio-code
+brew install python@3.11
+
+windows
+winget install Microsoft.VisualStudioCode
+winget install Python.Python.3.11
